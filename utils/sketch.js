@@ -1,0 +1,203 @@
+"use strict";
+
+let obstacle_map = new Map();
+let mode;
+let source = new Node(-1, -1);
+let goal = new Node(-1, -1);
+let m = new Mutex();
+
+function clearGrid() {
+    obstacle_map = new Map();
+    source = new Node(-1, -1);
+    goal = new Node(-1, -1);    
+}
+
+function updateObstaclesCounter() {
+    document.getElementById('num_obstacles').innerHTML = obstacle_map.size;
+}
+
+function renderObstacles() {
+    for(let o of obstacle_map.values()) {
+        fill('rgb(0, 0, 0)');
+        square(o.x, o.y, GRID_SIZE);
+    }
+    updateObstaclesCounter()
+}
+
+function renderPoints() {
+    if(source.x > -1 && source.y > -1) {
+        fill('rgb(255, 0, 0)');
+        circle(source.x+GRID_SIZE/2, source.y+GRID_SIZE/2, DIAMETER);        
+    }
+    if(goal.x > -1 && goal.y > -1) {
+        fill('rgb(0, 255, 0)');
+        circle(goal.x+GRID_SIZE/2, goal.y+GRID_SIZE/2, DIAMETER);        
+    }    
+}
+
+function renderGrid() {
+    clear();
+    for(let i=0;i <= WIDTH; i+=GRID_SIZE) {
+        stroke('rgb(0, 0, 0)');
+        line(i, 0, i, HEIGHT);
+    }
+    for(let i=0;i <= HEIGHT; i+=GRID_SIZE) {
+        stroke('rgb(0, 0, 0)');
+        line(0, i, WIDTH, i);
+    }    
+    renderObstacles();
+    renderPoints();
+}
+
+function setup() {
+    var canvas = createCanvas(WIDTH, HEIGHT);
+    canvas.parent("sketch");   
+    background(250, 250, 250);    
+    renderGrid();
+}
+
+function draw() {
+  
+}
+
+function isSource(x, y) {
+    return x == source.x ? y == source.y ? 1 : 0 : 0;
+}
+
+function isGoal(x, y) {
+    return x == goal.x ? y == goal.y ? 1 : 0 : 0;
+}
+
+function mouseDragged() {
+    if(mode == DRAW_OBSTACLES && m.key == false) {
+        let h_x = Math.floor(mouseX/GRID_SIZE)*GRID_SIZE;
+        let v_y = Math.floor(mouseY/GRID_SIZE)*GRID_SIZE;
+        if((h_x >= 0 && h_x<WIDTH) && (v_y >= 0 && v_y<HEIGHT) && obstacle_map.has(h_x+','+v_y) == false) {
+            if(!isGoal(h_x, v_y) && !isSource(h_x, v_y)) {
+                obstacle_map.set(h_x+','+v_y, new Obstacle(h_x, v_y));
+                renderGrid();
+            }
+        }
+    } else if(mode == ERASE_OBSTACLES && m.key == false) {
+        let h_x = Math.floor(mouseX/GRID_SIZE)*GRID_SIZE;
+        let v_y = Math.floor(mouseY/GRID_SIZE)*GRID_SIZE;
+        if((h_x >= 0 && h_x<WIDTH) && (v_y >= 0 && v_y<HEIGHT) && obstacle_map.has(h_x+','+v_y) == true) {
+            obstacle_map.delete(h_x+','+v_y);
+            renderGrid();
+        }
+    }
+}
+
+function mouseReleased() {
+    if(mode == MARK_SOURCE && m.key == false) {
+        let x = Math.floor(mouseX/GRID_SIZE)*GRID_SIZE;
+        let y = Math.floor(mouseY/GRID_SIZE)*GRID_SIZE;
+        if(obstacle_map.has(x+','+y) == false && (x >= 0 && x<WIDTH) && (y >= 0 && y<HEIGHT)) {
+            source = new Node(x, y);
+            source.key = source.x+','+source.y;
+            renderGrid();
+        }
+    } else if(mode == MARK_DESTINATION && m.key == false) {
+        let x = Math.floor(mouseX/GRID_SIZE)*GRID_SIZE;
+        let y = Math.floor(mouseY/GRID_SIZE)*GRID_SIZE; 
+        if(obstacle_map.has(x+','+y) == false && (x >= 0 && x<WIDTH) && (y >= 0 && y<HEIGHT)) {
+            goal = new Node(x, y);
+            goal.key = goal.x+goal.y;       
+            renderGrid();
+        }        
+    }
+}
+
+async function AStar4_Wrapper() {
+    if((goal.x>=0 && goal.x<WIDTH) && (goal.y>= 0 && goal.y<HEIGHT) && 
+    (source.x>=0 && source.x<WIDTH) && (source.y>= 0 && source.y<HEIGHT)) {
+        let _ = new AStar4(source, goal);
+        document.getElementById('legend').style.display = 'block';
+        await _.start(obstacle_map).then(() => {
+            document.getElementById('p_path_found').style.display = 'block';  
+            if(_.reached == 0) {
+                document.getElementById('p_path_found').innerText = 'Unreachable!';
+            } else {
+                document.getElementById('p_path_found').innerText = 'Goal reached!';
+            }
+        });
+    } else {
+        alert('Invalid source or destination!');
+    }          
+}
+
+async function AStar8_Wrapper() {
+    if((goal.x>=0 && goal.x<WIDTH) && (goal.y>= 0 && goal.y<HEIGHT) && 
+    (source.x>=0 && source.x<WIDTH) && (source.y>= 0 && source.y<HEIGHT)) {
+        let _ = new AStar8(source, goal);
+        document.getElementById('legend').style.display = 'block';
+        await _.start(obstacle_map).then(() => {
+            document.getElementById('p_path_found').style.display = 'block';           
+            if(_.reached == 0) {
+                document.getElementById('p_path_found').innerText = 'Unreachable!';
+            } else {
+                document.getElementById('p_path_found').innerText = 'Goal reached!';
+            }
+        });
+    } else {
+        alert('Invalid source or destination!');
+    }          
+}
+
+function rand(min, max) {
+    return Math.floor(Math.random() * (max - min) + min);
+}
+
+function randD() { 
+    return Math.random() > 0.5 ? 1 : 0;
+}
+
+async function fill_obstacles() {
+    let i, j;
+    for(i=0;i<WIDTH;i+=GRID_SIZE) {
+        for(j=0;j<HEIGHT;j+=GRID_SIZE) {
+            obstacle_map.set(i+','+j, new Obstacle(i, j));
+        }
+    }    
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+async function maze_generator() {
+    clearGrid();
+    let i, j;
+    // horizontal border
+    for(i=0;i<WIDTH;i+=GRID_SIZE) {
+        obstacle_map.set(i+','+0, new Obstacle(i, 0));
+        obstacle_map.set(i+','+(HEIGHT-GRID_SIZE), new Obstacle(i, HEIGHT-GRID_SIZE));
+    }
+    // vertical border
+    for(i=0;i<HEIGHT;i+=GRID_SIZE) {
+        obstacle_map.set(0+','+i, new Obstacle(0, i));
+        obstacle_map.set((WIDTH-GRID_SIZE)+','+i, new Obstacle(WIDTH-GRID_SIZE, i));
+    }    
+
+    let edges = [];
+    let uf = new UnionFind();
+    let idx, cell_i, cell_j;
+    let rows = Math.floor((HEIGHT-GRID_SIZE)/GRID_SIZE);
+    let cols = Math.floor((WIDTH-GRID_SIZE)/GRID_SIZE);
+    for(i=GRID_SIZE;i<(WIDTH-GRID_SIZE);i+=GRID_SIZE) {
+        for(j=GRID_SIZE;j<(HEIGHT-GRID_SIZE);j+=GRID_SIZE) {
+            cell_i = Math.floor(i/GRID_SIZE);
+            cell_j = Math.floor(j/GRID_SIZE);
+            idx = cell_i*cell_j;
+            uf.add(idx);
+            edges.push(new Edge(idx, cell+1));
+            edges.push(new Edge(idx, cell-1));
+            edges.push(new Edge(idx, idx+cols));
+            edges.push(new Edge(idx, idx-cols));
+        }
+    }
+    console.log(edges);       
+}

@@ -1,0 +1,53 @@
+body {
+    overflow-x: hidden; /* Hide scrollbars */
+    background-color: white;
+    animation-name: example;
+    animation-duration: 4s;
+    animation-iteration-count: infinite;   
+    animation-direction: alternate;
+    animation-timing-function: ease-in-out; 
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Opera and Firefox */    
+}
+
+@keyframes example {
+    from {background-color: palevioletred;}
+    to {background-color:blueviolet;}
+}
+
+#panel {
+    margin: 5px 5px 5px 5px;
+}
+
+#panel {
+    padding: 3px 3px 3px 3px;
+}
+
+#p_path_found {
+    display: none;
+}
+
+.box {
+    height: 20px;
+    width: 20px;
+    display: inline-block;
+    vertical-align: middle;    
+}
+
+.text {
+    margin-left: 5px;
+    vertical-align: middle;    
+}
+
+#discovered_box {
+    background-color: rgb(240, 240, 255);
+}
+
+#visited_box {
+    background-color: rgb(0, 255, 255);
+}

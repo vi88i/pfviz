@@ -1,0 +1,16 @@
+{
+  "name": "a-star-viz",
+  "version": "1.0.0",
+  "description": "A* Pathfinding visualization",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app.js",
+    "start": "node app.js"
+  },
+  "author": "Vighnesh Nayak S",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1"
+  }
+}

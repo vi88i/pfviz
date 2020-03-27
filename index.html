@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>A*</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>        
+
+        <script src="https://cdn.jsdelivr.net/npm/p5@1.0.0/lib/p5.js"></script>
+        <script src="./utils/config.js" type="text/javascript"></script>
+        <script src="./utils/grid.js" type="text/javascript"></script>
+        <script src="./utils/sketch.js" type="text/javascript"></script>
+    </head>
+    <body> 
+        <div id="panel" class="card text-white bg-primary mb-3" style="max-width: 180rem;">
+            <div class="card-header">A* Path Finder</div>
+            <div class="card-body">
+                <button id="b0" value="draw" class="btn btn-primary">Draw maze</button>
+                <button id="b1" value="fill" class="btn btn-primary">Fill</button>
+                <button id="b2" value="erase" class="btn btn-primary">Eraser</button>
+                <button id="b3" value="clear" class="btn btn-primary">Clear maze</button>
+                <button id="b4" value="clear-viz" class="btn btn-primary">Clear viz</button>
+                <button id="b5" value="ss" class="btn btn-primary">Select source</button>
+                <button id="b6" value="sg" class="btn btn-primary">Select goal</button>
+                <button id="b7" value="maze_gen" class="btn btn-primary">Random Maze</button>
+                <button id="b8" value="a*8" class="btn btn-primary">A* 8-way</button>
+                <button id="b9" value="a*4" class="btn btn-primary">A* 4-way</button>
+            </div>
+            <div id="summary" class="card text-white bg-dark mb-3" style="max-width: 200rem;">
+                <div class="card-header">Summary</div>
+                <div class="card-body">
+                    <p id="p_num_grids">Number of grids: <span id="num_grids">0</span></p>
+                    <p id="p_num_obstacles">Number of Obstacles: <span id="num_obstacles">0</span></p>
+                    <p id="p_path_found"></p>
+                    <div id="legend" style="display: none;">
+                        <div class="box" id="discovered_box"></div><span class="text"> - Discovered</span>
+                        <div class="box" id="visited_box"></div><span class="text"> - Visited</span>
+                    </div>             
+                </div>
+            </div>                
+        </div>
+        <div id="sketch"></div>
+        <link rel="stylesheet" href="./index.css">
+        <script src="./utils/index.js" type="text/javascript"></script>                    
+    </body>
+</html>
