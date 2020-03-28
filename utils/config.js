@@ -1,7 +1,7 @@
 "use strict";
 
 const WIDTH = 1300; // width of canvas 
-const HEIGHT = 640;  // height of canvas
+const HEIGHT = 1300;  // height of canvas
 const GRID_SIZE = 20; // grid size
 const DIAMETER = GRID_SIZE; // radius of source and destination
 const DRAW_OBSTACLES = 0;

@@ -50,8 +50,6 @@ async function render(key) {
             maze_generator().then(() => {
                 m.release();
                 renderGrid();
-            }).catch(() => {
-                m.release();
             });
             break;
         case "fill":
@@ -59,7 +57,9 @@ async function render(key) {
             fill_obstacles().then(() => {
                 m.release();
                 renderGrid();
-            });            
+            }).catch(() => {
+                m.release();
+            });;            
             break;    
     }
 }

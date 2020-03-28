@@ -25,25 +25,6 @@ class Edge {
     }
 }
 
-class UnionFind {
-    constructor() {
-        this.parent = [];
-    }
-    add(idx) {
-        this.parent.push(idx);
-    }
-    union(x, y) {
-        let xRoot = find(x);
-        let yRoot = find(y);
-        this.parent[yRoot] = xRoot;
-    }
-    find(idx) {
-        if(this.parent[idx] == idx)
-            return idx;
-        this.find(this.parent[idx]);    
-    }
-}
-
 class MinHeap {
     constructor() {
         this.heap = [];

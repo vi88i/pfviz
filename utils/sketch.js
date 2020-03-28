@@ -144,14 +144,6 @@ async function AStar8_Wrapper() {
     }          
 }
 
-function rand(min, max) {
-    return Math.floor(Math.random() * (max - min) + min);
-}
-
-function randD() { 
-    return Math.random() > 0.5 ? 1 : 0;
-}
-
 async function fill_obstacles() {
     let i, j;
     for(i=0;i<WIDTH;i+=GRID_SIZE) {
@@ -168,10 +160,23 @@ function shuffleArray(array) {
     }
 }
 
+function getRowIndex(idx, rows) {
+    return Math.floor(idx/(rows+1));
+}
+
+function getColIndex(idx, cols) {
+    return idx%cols;
+}
+
+function randD() { // decides the fate of an edge, whether to be to co 
+    return Math.random() > 0.4 ? 1 : 0;
+}
+
 async function maze_generator() {
     clearGrid();
-    let i, j;
-    // horizontal border
+    let i, j, cur, x, y;
+
+    // vertical border
     for(i=0;i<WIDTH;i+=GRID_SIZE) {
         obstacle_map.set(i+','+0, new Obstacle(i, 0));
         obstacle_map.set(i+','+(HEIGHT-GRID_SIZE), new Obstacle(i, HEIGHT-GRID_SIZE));
@@ -180,24 +185,32 @@ async function maze_generator() {
     for(i=0;i<HEIGHT;i+=GRID_SIZE) {
         obstacle_map.set(0+','+i, new Obstacle(0, i));
         obstacle_map.set((WIDTH-GRID_SIZE)+','+i, new Obstacle(WIDTH-GRID_SIZE, i));
-    }    
+    }        
 
     let edges = [];
-    let uf = new UnionFind();
-    let idx, cell_i, cell_j;
-    let rows = Math.floor((HEIGHT-GRID_SIZE)/GRID_SIZE);
-    let cols = Math.floor((WIDTH-GRID_SIZE)/GRID_SIZE);
-    for(i=GRID_SIZE;i<(WIDTH-GRID_SIZE);i+=GRID_SIZE) {
-        for(j=GRID_SIZE;j<(HEIGHT-GRID_SIZE);j+=GRID_SIZE) {
-            cell_i = Math.floor(i/GRID_SIZE);
-            cell_j = Math.floor(j/GRID_SIZE);
-            idx = cell_i*cell_j;
-            uf.add(idx);
-            edges.push(new Edge(idx, cell+1));
-            edges.push(new Edge(idx, cell-1));
-            edges.push(new Edge(idx, idx+cols));
-            edges.push(new Edge(idx, idx-cols));
+    let rows = Math.floor(HEIGHT/GRID_SIZE);
+    let cols = Math.floor(WIDTH/GRID_SIZE);
+
+    for(i=2;i<=rows;i+=3) {
+        for(j=2;j<=cols;j+=3) {
+            if(j+1 < cols && randD()==1)
+                edges.push(new Edge(i*cols+j, i*cols+j+1));
+            if(j-1 >= 0 && randD()==1)    
+                edges.push(new Edge(i*cols+j, i*cols+j-1));
+            if(i+1 < rows && randD()==1)    
+                edges.push(new Edge(i*cols+j, i*cols+j+cols));
+            if(i-1 >= 0 && randD()==1)    
+                edges.push(new Edge(i*cols+j, i*cols+j-cols));                                
         }
     }
-    console.log(edges);       
+    shuffleArray(edges);  
+    while(edges.length!=0) {
+        cur = edges.pop();
+        x = getColIndex(cur.from, rows)*GRID_SIZE;
+        y = getRowIndex(cur.from, cols)*GRID_SIZE;
+        obstacle_map.set(x+','+y, new Obstacle(x, y));
+        x = getColIndex(cur.to, rows)*GRID_SIZE;
+        y = getRowIndex(cur.to, cols)*GRID_SIZE;
+        obstacle_map.set(x+','+y, new Obstacle(x, y));
+    }
 }
