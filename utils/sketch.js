@@ -16,12 +16,14 @@ function updateObstaclesCounter() {
     document.getElementById('num_obstacles').innerHTML = obstacle_map.size;
 }
 
-function renderObstacles() {
+async function renderObstacles(animate=false) {
     for(let o of obstacle_map.values()) {
         fill('rgb(0, 0, 0)');
         square(o.x, o.y, GRID_SIZE);
+        if(animate == true)
+            await delay(5);
     }
-    updateObstaclesCounter()
+    updateObstaclesCounter();
 }
 
 function renderPoints() {
@@ -35,7 +37,7 @@ function renderPoints() {
     }    
 }
 
-function renderGrid() {
+function renderGrid(animate=false) {
     clear();
     for(let i=0;i <= WIDTH; i+=GRID_SIZE) {
         stroke('rgb(0, 0, 0)');
@@ -45,8 +47,8 @@ function renderGrid() {
         stroke('rgb(0, 0, 0)');
         line(0, i, WIDTH, i);
     }    
-    renderObstacles();
     renderPoints();
+    renderObstacles(animate);
 }
 
 function setup() {
@@ -160,16 +162,17 @@ function shuffleArray(array) {
     }
 }
 
-function getRowIndex(idx, rows) {
-    return Math.floor(idx/(rows+1));
+function getRowIndex(idx, cols) {
+    return Math.floor((idx-getColIndex(idx, cols))/cols);
 }
+
 
 function getColIndex(idx, cols) {
     return idx%cols;
 }
 
 function randD() { // decides the fate of an edge, whether to be to co 
-    return Math.random() > 0.4 ? 1 : 0;
+    return Math.random() > 0.5 ? 1 : 0;
 }
 
 async function maze_generator() {
@@ -190,27 +193,33 @@ async function maze_generator() {
     let edges = [];
     let rows = Math.floor(HEIGHT/GRID_SIZE);
     let cols = Math.floor(WIDTH/GRID_SIZE);
+    let uf = new UnionFind();
 
-    for(i=2;i<=rows;i+=3) {
-        for(j=2;j<=cols;j+=3) {
-            if(j+1 < cols && randD()==1)
+    for(i=2;i<rows;i+=3) {
+        for(j=2;j<cols;j+=3) {
+            uf.makeSet(i*cols+j);
+            if(j+1 < cols-1)
                 edges.push(new Edge(i*cols+j, i*cols+j+1));
-            if(j-1 >= 0 && randD()==1)    
+            if(j-1 > 0)    
                 edges.push(new Edge(i*cols+j, i*cols+j-1));
-            if(i+1 < rows && randD()==1)    
+            if(i+1 < rows-1) 
                 edges.push(new Edge(i*cols+j, i*cols+j+cols));
-            if(i-1 >= 0 && randD()==1)    
-                edges.push(new Edge(i*cols+j, i*cols+j-cols));                                
+            if(i-1 > 0)
+                edges.push(new Edge(i*cols+j, i*cols+j-cols));       
         }
     }
     shuffleArray(edges);  
     while(edges.length!=0) {
         cur = edges.pop();
-        x = getColIndex(cur.from, rows)*GRID_SIZE;
-        y = getRowIndex(cur.from, cols)*GRID_SIZE;
-        obstacle_map.set(x+','+y, new Obstacle(x, y));
-        x = getColIndex(cur.to, rows)*GRID_SIZE;
-        y = getRowIndex(cur.to, cols)*GRID_SIZE;
-        obstacle_map.set(x+','+y, new Obstacle(x, y));
+        if(uf.find(cur.from) != uf.find(cur.to)) {
+            cur = edges.pop();
+            uf.union(cur.from, cur.to);
+            x = getColIndex(cur.from, cols)*GRID_SIZE;
+            y = getRowIndex(cur.from, cols)*GRID_SIZE;
+            obstacle_map.set(x+','+y, new Obstacle(x, y));
+            x = getColIndex(cur.to, cols)*GRID_SIZE;
+            y = getRowIndex(cur.to, cols)*GRID_SIZE;
+            obstacle_map.set(x+','+y, new Obstacle(x, y));
+        }
     }
 }

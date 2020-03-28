@@ -49,7 +49,7 @@ async function render(key) {
             m.hold(); 
             maze_generator().then(() => {
                 m.release();
-                renderGrid();
+                renderGrid(true);
             });
             break;
         case "fill":

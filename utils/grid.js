@@ -6,6 +6,25 @@ async function delay(delayInms) {
     });
 }
 
+class UnionFind {
+    constructor() {
+        this.parent = [];
+    }
+    makeSet(idx) {
+        this.parent[idx] = idx;
+    }
+    find(x) {
+        if(this.parent[x] == x)
+            return x;
+        return this.find(this.parent[x]);    
+    }
+    union(x, y) {
+        let xRoot = this.find(x);
+        let yRoot = this.find(y);
+        this.parent[xRoot] = yRoot;
+    }
+}
+
 class Mutex {
     constructor() {
         this.key = false;
