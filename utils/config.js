@@ -10,4 +10,3 @@ const MARK_SOURCE = 1;
 const MARK_DESTINATION = 2;
 const COST_OF_DIAGONAL = 1.4;
 const COST_OF_NON_DIAGONAL = 1;
-const NUM_HOLES = 20;

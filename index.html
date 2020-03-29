@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>A*</title>
+        <title>Path finding Algorithms</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -17,18 +17,21 @@
     </head>
     <body> 
         <div id="panel" class="card text-white bg-primary mb-3" style="max-width: 180rem;">
-            <div class="card-header">A* Path Finder</div>
+            <div class="card-header">Path finding Visualizer</div>
             <div class="card-body">
                 <button id="b0" value="draw" class="btn btn-primary">Draw maze</button>
                 <button id="b1" value="fill" class="btn btn-primary">Fill</button>
                 <button id="b2" value="erase" class="btn btn-primary">Eraser</button>
                 <button id="b3" value="clear" class="btn btn-primary">Clear maze</button>
                 <button id="b4" value="clear-viz" class="btn btn-primary">Clear viz</button>
-                <button id="b5" value="ss" class="btn btn-primary">Select source</button>
-                <button id="b6" value="sg" class="btn btn-primary">Select goal</button>
+                <button id="b5" value="ss" class="btn btn-primary">Source</button>
+                <button id="b6" value="sg" class="btn btn-primary">Goal</button>
                 <button id="b7" value="maze_gen" class="btn btn-primary">Random Maze</button>
                 <button id="b8" value="a*8" class="btn btn-primary">A* 8-way</button>
                 <button id="b9" value="a*4" class="btn btn-primary">A* 4-way</button>
+                <button id="b10" value="dijkstra" class="btn btn-primary">Dijkstra's</button>
+                <button id="b11" value="best-first" class="btn btn-primary">Best First Search</button>
+                <button id="b12" value="all" class="btn btn-primary">Run all</button>
             </div>
             <div id="summary" class="card text-white bg-dark mb-3" style="max-width: 200rem;">
                 <div class="card-header">Summary</div>
@@ -36,10 +39,17 @@
                     <p id="p_num_grids">Number of grids: <span id="num_grids">0</span></p>
                     <p id="p_num_obstacles">Number of Obstacles: <span id="num_obstacles">0</span></p>
                     <p id="p_path_found"></p>
+                    <p id="p_distance">Distance: <span id="distance">0</span></p>
                     <div id="legend" style="display: none;">
                         <div class="box" id="discovered_box"></div><span class="text"> - Closed list</span>
-                        <div class="box" id="visited_box"></div><span class="text"> - Open list</span>
+                        <div class="box" id="visited_box"></div><span class="text"> - Open list</span>                       
                     </div>             
+                    <div id="line_legend" style="display: none;">
+                        <div class="line" id="a8"></div><span class="text"> - A* 8-way Distance:</span><span class="text" id="distance_a8">0</span></p>
+                        <div class="line" id="a4"></div><span class="text"> - A* 4-way Distance:</span><span class="text" id="distance_a4">0</span></p>
+                        <div class="line" id="dijkstra"></div><span class="text"> - Dijkstra's Distance:</span><span class="text" id="distance_d">0</span></p>
+                        <div class="line" id="best"></div><span class="text"> - Best First Search Distance:</span><span class="text" id="distance_b">0</span></p>
+                    </div>                                 
                 </div>
             </div>                
         </div>

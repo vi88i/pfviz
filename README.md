@@ -1,7 +1,17 @@
-# A* Pathfinding Visualization
+# Path finding Visualization
 
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/7U1ZJefZf6s/0.jpg)](https://www.youtube.com/watch?v=7U1ZJefZf6s)
+![alt text](./assets/img.png "Path finding algorithms")
 
-This project aims to visualize A* path-finding algorithm using p5js. This project includes A* using 4-way movement using Manhattan distance as heuristic loss and A* 8-way movement using Diagonal distance as heuristic loss!.
+This project aims to visualize path-finding algorithm using p5js.  
 
-Live demo at: https://a-star-viz.herokuapp.com/
+## Algorithms
+
+| *Name*            |     *Feature*  |
+|----------------|:-------------:|
+| A* 8-way movement | Uses Diagonal heuristic cost |
+| A* 8-way movement | Uses Manhattan distance as heuristic cost |
+| Dijkstra | Special case of A* when h(n) =0 |
+| Best First Search | Special case of A* when g(n) = 0 |
+| Maze generator | Uses Kruskal's algorithm |
+
+Available at: https://a-star-viz.herokuapp.com/

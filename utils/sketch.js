@@ -16,6 +16,11 @@ function updateObstaclesCounter() {
     document.getElementById('num_obstacles').innerHTML = obstacle_map.size;
 }
 
+function isPointsInRange() {
+    return (goal.x>=0 && goal.x<WIDTH) && (goal.y>= 0 && goal.y<HEIGHT) && 
+    (source.x>=0 && source.x<WIDTH) && (source.y>= 0 && source.y<HEIGHT) ;   
+}
+
 async function renderObstacles(animate=false) {
     for(let o of obstacle_map.values()) {
         fill('rgb(0, 0, 0)');
@@ -111,38 +116,90 @@ function mouseReleased() {
 }
 
 async function AStar4_Wrapper() {
-    if((goal.x>=0 && goal.x<WIDTH) && (goal.y>= 0 && goal.y<HEIGHT) && 
-    (source.x>=0 && source.x<WIDTH) && (source.y>= 0 && source.y<HEIGHT)) {
+    if(isPointsInRange() == true) {
         let _ = new AStar4(source, goal);
         document.getElementById('legend').style.display = 'block';
         await _.start(obstacle_map).then(() => {
+            document.getElementById('p_distance').style.display = 'block';
             document.getElementById('p_path_found').style.display = 'block';  
             if(_.reached == 0) {
                 document.getElementById('p_path_found').innerText = 'Unreachable!';
             } else {
                 document.getElementById('p_path_found').innerText = 'Goal reached!';
+                document.getElementById('distance').innerText = _.distance;
             }
         });
     } else {
-        alert('Invalid source or destination!');
+        alert('Invalid source or goal!');
     }          
 }
 
 async function AStar8_Wrapper() {
-    if((goal.x>=0 && goal.x<WIDTH) && (goal.y>= 0 && goal.y<HEIGHT) && 
-    (source.x>=0 && source.x<WIDTH) && (source.y>= 0 && source.y<HEIGHT)) {
+    if(isPointsInRange() == true) {
         let _ = new AStar8(source, goal);
         document.getElementById('legend').style.display = 'block';
         await _.start(obstacle_map).then(() => {
+            document.getElementById('p_distance').style.display = 'block';
             document.getElementById('p_path_found').style.display = 'block';           
             if(_.reached == 0) {
                 document.getElementById('p_path_found').innerText = 'Unreachable!';
             } else {
                 document.getElementById('p_path_found').innerText = 'Goal reached!';
+                document.getElementById('distance').innerText = _.distance;
             }
         });
     } else {
-        alert('Invalid source or destination!');
+        alert('Invalid source or goal!');
+    }          
+}
+
+async function Dijkstra_Wrapper() {
+    if(isPointsInRange() == true) {
+        let _ = new Dijkstra(source, goal);
+        document.getElementById('legend').style.display = 'block';
+        await _.start(obstacle_map).then(() => {
+            document.getElementById('p_distance').style.display = 'block';
+            document.getElementById('p_path_found').style.display = 'block';           
+            if(_.reached == 0) {
+                document.getElementById('p_path_found').innerText = 'Unreachable!';
+            } else {
+                document.getElementById('p_path_found').innerText = 'Goal reached!';
+                document.getElementById('distance').innerText = _.distance;
+            }
+        });
+    } else {
+        alert('Invalid source or goal!');
+    }          
+}
+
+async function BestFirstSearch_Wrapper() {
+    if(isPointsInRange() == true) {
+        let _ = new BestFirstSearch(source, goal);
+        document.getElementById('legend').style.display = 'block';
+        await _.start(obstacle_map).then(() => {
+            document.getElementById('p_distance').style.display = 'block';
+            document.getElementById('p_path_found').style.display = 'block';           
+            if(_.reached == 0) {
+                document.getElementById('p_path_found').innerText = 'Unreachable!';
+            } else {
+                document.getElementById('p_path_found').innerText = 'Goal reached!';
+                document.getElementById('distance').innerText = _.distance;
+            }
+        });
+    } else {
+        alert('Invalid source or goal!');
+    }          
+}
+
+async function RunAll() {
+    if(isPointsInRange() == true) {
+        document.getElementById('line_legend').style.display = 'block';
+        new AStar4(source, goal, 'rgb(255, 0, 0)').start(obstacle_map);
+        new AStar8(source, goal, 'rgb(0, 255, 0)').start(obstacle_map);
+        new Dijkstra(source, goal, 'rgb(0, 0, 255)').start(obstacle_map);
+        new BestFirstSearch(source, goal, 'rgb(255, 255, 255)').start(obstacle_map);
+    } else {
+        alert('Invalid source or goal!');
     }          
 }
 

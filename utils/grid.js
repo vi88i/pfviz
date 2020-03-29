@@ -6,6 +6,7 @@ async function delay(delayInms) {
     });
 }
 
+// union find algorithm implemented using array based disjoint set
 class UnionFind {
     constructor() {
         this.parent = [];
@@ -25,18 +26,22 @@ class UnionFind {
     }
 }
 
+// mutex to prevent multiple activities when one process is runnning
 class Mutex {
     constructor() {
         this.key = false;
     }
     hold() {
-        this.key = true;
+        if(this.key !=true)
+            this.key = true;
     }
     release() {
-        this.key = false;
+        if(this.key != false)
+            this.key = false;
     }
 }
 
+// represents an edge - from, to are linear indexes of the grid
 class Edge {
     constructor(from, to) {
         this.from = from;
@@ -44,6 +49,7 @@ class Edge {
     }
 }
 
+// custom (two metrics will decide heapification, fast look up using Sets) min heap implementation for A*
 class MinHeap {
     constructor() {
         this.heap = [];
@@ -53,24 +59,18 @@ class MinHeap {
     has(key) {
         return this.set.has(key);
     }
-    getIdx(key) { // currently O(n), can be improved to O(log(n))
+    getNodeAndIdx(key) { // currently O(n), can be improved to O(log(n))
         for(let i=1;i<this.heap.length;i++) {
-            if(key.localeCompare(this.heap[i].key) == 0) {
+            if(key.localeCompare(this.heap[i].key) == 0)
                 return [this.heap[i], i];
-            }
         }
     }
-    set(node, idx) { // perform upward heapification from idx
+    updateNode(node, idx) { // perform upward heapification from idx
         this.heap[idx] = node;
         let childIdx = idx;
         let parentIdx = Math.floor(childIdx/2);
         let tmp;
-        while(parentIdx > 1 && (this.heap[childIdx].f <= this.heap[parentIdx].f)) {
-            if(this.heap[childIdx].f == this.heap[parentIdx].f) {
-                if(this.heap[childIdx].h > this.heap[parentIdx].h) {
-                    break;
-                }
-            } 
+        while(this.heap[childIdx].f < this.heap[parentIdx].f) {
             tmp = this.heap[childIdx];
             this.heap[childIdx] = this.heap[parentIdx];
             this.heap[parentIdx] = tmp;
@@ -78,18 +78,13 @@ class MinHeap {
             parentIdx = Math.floor(childIdx/2);
         }          
     }
-    add(node) {
+    add(node) { // add node to the end of the array and perform upward heapification
         this.heap.push(node);
         this.set.add(node.key);
         let childIdx = this.heap.length-1;
         let parentIdx = Math.floor(childIdx/2);
         let tmp;
-        while(parentIdx > 1 && (this.heap[childIdx].f <= this.heap[parentIdx].f)) {
-            if(this.heap[childIdx].f == this.heap[parentIdx].f) {
-                if(this.heap[childIdx].h > this.heap[parentIdx].h) {
-                    break;
-                }
-            } 
+        while(this.heap[childIdx].f < this.heap[parentIdx].f) {
             tmp = this.heap[childIdx];
             this.heap[childIdx] = this.heap[parentIdx];
             this.heap[parentIdx] = tmp;
@@ -100,52 +95,23 @@ class MinHeap {
     size() {
         return this.heap.length-1;
     }
-    minIdx(idx, n) {
-        let left_child = 2*idx;
-        let right_child = 2*idx+1;
-        let left_exp = (left_child <= n) && (this.heap[left_child].f <= this.heap[n].f);
-        let right_exp = (right_child <= n) && (this.heap[right_child].f <= this.heap[n].f);
-
-        if(left_exp == true && right_exp == true) {
-            if(this.heap[left_child].f < this.heap[right_child].f) {
-                return left_child;
-            } else if(this.heap[left_child].f > this.heap[right_child].f) {
-                return right_child;
-            } else {
-                if(this.heap[left_child].h <= this.heap[right_child].h) {
-                    return left_child;
-                } else {
-                    return right_child;
-                }
-            }
-        } else if(left_exp == true) {
-            return left_child;
-        } else if(right_exp == true) {
-            return right_child;
-        } else {
-            return -1;
-        }
-    }
-    get() {
+    get() { // removes the node on top of stack and re-heapifies the heap.
         let res = this.heap[1];
-        this.set.delete(res.key);
         this.heap[1] = this.heap[this.heap.length-1];
+        this.set.delete(res.key);
         this.heap.pop();
-        if(this.heap.length > 2) {
-            let parentIdx = 1;
-            let childIdx, tmp;
-            while((childIdx=this.minIdx(parentIdx, this.heap.length-1))!=-1) {
-                tmp = this.heap[childIdx];
-                this.heap[childIdx] = this.heap[parentIdx];
-                this.heap[parentIdx] = tmp;
-                parentIdx = childIdx;                    
-            }
+        let tmp_heap = this.heap;
+        this.heap = [];
+        this.heap.push(-1);
+        this.set = new Set();
+        for(let i=1;i<tmp_heap.length;i++) {
+            this.add(tmp_heap[i]);
         }
         return res;
     }
 }
 
-class Obstacle {
+class Obstacle { // (x, y) represents the top left co-ordinate of cell (square)
     constructor(x, y) {
         this.x = x;
         this.y = y;
@@ -155,146 +121,181 @@ class Obstacle {
 class Node {
     constructor(x, y) {
         this.x = x;
-        this.y = y;
-        this.parent = null;
-        this.h = 0;
-        this.g = 0;
-        this.f = 0;
-        this.key = x+','+y;
+        this.y = y; // (x, y) represents the top left co-ordinate of cell (square)
+        this.parent = null; // points to parent node
+        this.f = 0; // heuristic loss
+        this.g = 0; // base cost
+        this.h = 0; // sum of g + h 
+        this.key = x+','+y; // key is useful for quick lookup in min-heap
     }
 }
 
 class PathFinder {
-    constructor(source, goal) {
-        this.source = source;
-        this.goal = goal;
-        this.open = new MinHeap();
-        this.close = new Map();
-        this.reached = 0;
+    constructor(source, goal, cc) {
+        this.source = source; // source co-ordinate (top left co-ordinate of source cell)
+        this.goal = goal; // source co-ordinate (top left co-ordinate of goal cell)
+        this.open = new MinHeap(); // open list - potential next node to jump based on f cost
+        this.close = new Map(); // closed list - won't be visited again
+        this.reached = 0; // flag for result check
+        this.distance = 0;
+        this.cc = cc;
     }
-    isGoalNode(node) {
+    isGoalNode(node) { // checks if current node goal cell
         return node.x == this.goal.x && node.y == this.goal.y;
     }
-    async renderLists() {
-        let node;
-        for(let i=1;i<this.open.heap.length;i++) {
-            node = this.open.heap[i];
-            if(node.x == this.goal.x && node.y == this.goal.y)
-                continue;
-            fill('rgb(0, 255, 255)');
-            square(node.x, node.y, GRID_SIZE);                
+    isNodeInRange(p, dir) {
+        return ((p.x+dir[0]) >= 0) && ((p.x+dir[0]) < WIDTH) && ((p.y+dir[1]) >= 0) && ((p.y+dir[1]) < HEIGHT);        
+    }    
+    async renderLists() { // animates closed and open list
+        if(this.cc.localeCompare('rgb(0, 0, 0)') == 0) {
+            let node;
+            for(let node of this.close.values()) {
+                if((node.x == this.source.x) && (node.y == this.source.y))
+                    continue;
+                fill('rgb(240, 240, 255)');
+                square(node.x, node.y, GRID_SIZE);            
+            }
+            for(let i=1;i<this.open.heap.length;i++) {
+                node = this.open.heap[i];
+                if((node.x == this.goal.x) && (node.y == this.goal.y))
+                    continue;
+                fill('rgb(0, 255, 255)');
+                square(node.x, node.y, GRID_SIZE);                
+            }        
+            await delay(5);
         }
-        for(let node of this.close.values()) {
-            if(node.x == this.source.x && node.y == this.source.y)
-                continue;
-            fill('rgb(240, 240, 255)');
-            square(node.x, node.y, GRID_SIZE);            
-        }
-        await delay(5);
     }
-    async renderLine(node) {
+    isDiagonalNode(parent, node) {
+        let directions = [  [-1*GRID_SIZE, -1*GRID_SIZE],
+                            [1*GRID_SIZE, -1*GRID_SIZE],
+                            [-1*GRID_SIZE, 1*GRID_SIZE],
+                            [1*GRID_SIZE, 1*GRID_SIZE] 
+                        ];
+        for(let i=0; i<directions.length;i++) {
+            let dir = [directions[i][0], directions[i][1]];
+            if(this.isNodeInRange(parent, dir) == true) {
+                if((node.x == (parent.x+dir[0])) && (node.y == (parent.y+dir[1])))
+                    return true;
+            }
+        }    
+        return false;                    
+    }
+    async renderLine(node) { // uses recursion to draw line from source to goal
         if(node == null || node.parent == null)
             return;
         else {
             await this.renderLine(node.parent);
             strokeWeight(4);
-            stroke('rgb(0, 0, 0)');
+            stroke(this.cc);
             line(node.x+GRID_SIZE/2, node.y+GRID_SIZE/2, node.parent.x+GRID_SIZE/2, node.parent.y+GRID_SIZE/2);
             strokeWeight(1);
+            if(this.isDiagonalNode(node.parent, node) == true)
+                this.distance = this.distance + 1.4;
+            else
+                this.distance = this.distance + 1;
             await delay(5);
         }    
     }
 }
 
 class AStar4 extends PathFinder {
-    constructor() {
-        super(source, goal);
+    constructor(source, goal, cc='rgb(0, 0, 0)') {
+        super(source, goal, cc);
     }
     ManhattanDistance(node) {
-        return Math.abs(node.x - goal.x) + Math.abs(node.y - goal.y);
-    }
-    createNode(p, dir) {
+        return 1.1 * (Math.abs(node.x - goal.x) + Math.abs(node.y - goal.y));
+    }             
+    createNode(p, dir) { // creates a node, based on parent node and direction
         let node = new Node(p.x+dir[0], p.y+dir[1]);
         node.g = p.g + GRID_SIZE;
         node.h = this.ManhattanDistance(node);
         node.f = node.g + node.h; 
         node.parent = p;
         return node;        
-    }            
+    }   
     async start(obstacle_map) {
         let p, node, tmp, dir;
-        // degree of movement = 4
         let directions = [  [0, 1*GRID_SIZE],
                             [0, -1*GRID_SIZE],
                             [1*GRID_SIZE, 0],
                             [-1*GRID_SIZE, 0] 
                         ];        
-        this.source.h = this.source.g + this.ManhattanDistance(source);                
+        this.source.f = this.source.g + this.ManhattanDistance(source);                
         this.open.add(source);                                
         while(this.open.size()!=0) {
             p = this.open.get();
+            await this.renderLists();
             if(this.isGoalNode(p)) {
                 this.reached = 1;
-                await this.renderLine(p);                
+                await this.renderLine(p).then(() => {
+                    if(this.cc.localeCompare('rgb(0, 0, 0)') != 0) {
+                        if(this.reached == 1)
+                            document.getElementById('distance_a4').innerText = this.distance.toFixed(1);
+                        else    
+                            document.getElementById('distance_a4').innerText = Infinity;
+                    }                           
+                });
                 return;   
             }
             this.close.set(p.key, p);
             for(let i=0; i<directions.length;i++) {
                 dir = [directions[i][0], directions[i][1]];
-                if(( ((p.x+dir[0]) >= 0) && ((p.x+dir[0]) < WIDTH)) && ((p.y+dir[1]) >= 0) && ((p.y+dir[1]) < HEIGHT)) {
-                    if(obstacle_map.has((p.x+dir[0])+','+(p.y+dir[1])) == false) {
-                        node = this.createNode(p, dir);              
+                if(this.isNodeInRange(p, dir)) {
+                    node = this.createNode(p, dir);
+                    if(obstacle_map.has(node.key) == false) {              
                         if(this.close.has(node.key) == false) {
                             if(this.open.has(node.key) == false) {
                                 this.open.add(node);
                             } else {
-                                tmp = this.open.getIdx(node.key);
-                                if(tmp[0].h < node.h) {
-                                    this.open.set(node, tmp[1]);
+                                tmp = this.open.getNodeAndIdx(node.key);
+                                if(tmp[0].g > node.g) { 
+                                    this.open.updateNode(node, tmp[1]);
                                 }   
                             }
                         }   
                     }
                 }
-            }
-            await this.renderLists();               
+            }             
         }       
     }    
 }
 
 class AStar8 extends PathFinder {
-    constructor(source, goal) {
-        super(source, goal);
+    constructor(source, goal, cc='rgb(0, 0, 0)') {
+        super(source, goal, cc);
     }
     max(i, j) {
-        i = Math.abs(i);
-        j = Math.abs(j);
         if(i >= j)
             return i;
         return j;    
     }
-    min(i, j) {
-        i = Math.abs(i);
-        j = Math.abs(j);        
+    min(i, j) {        
         if(i < j)
             return i;
         return j;    
-    }    
+    }
     DiagonalHeuristic(node) {
-        return COST_OF_DIAGONAL*this.min(node.x-this.goal.x, node.y-this.goal.y) + 
-                COST_OF_NON_DIAGONAL*(this.max(node.x-this.goal.x, node.y-this.goal.y) - this.min(node.x-this.goal.x, node.y-this.goal.y));         
-    }        
+        let h_diagonal = COST_OF_DIAGONAL*this.min(Math.abs(node.x-this.goal.x), Math.abs(node.y-this.goal.y));
+        let h_straight = COST_OF_NON_DIAGONAL*(this.max(Math.abs(node.x-this.goal.x), Math.abs(node.y-this.goal.y)) - 
+                        this.min(Math.abs(node.x-this.goal.x), Math.abs(node.y-this.goal.y))); 
+        return h_diagonal + h_straight;
+                         
+    }   
+    findGCost(dir) {
+        if(dir[0] == 0 || dir[1] == 0)
+            return GRID_SIZE;
+        return 1.4*GRID_SIZE;    
+    }
     createNode(p, dir) {
         let node = new Node(p.x+dir[0], p.y+dir[1]);
-        node.g = p.g + GRID_SIZE;
+        node.g = p.g + this.findGCost(dir);
         node.h = this.DiagonalHeuristic(node);
         node.f = node.g + node.h; 
         node.parent = p;
         return node;        
-    }    
+    }
     async start(obstacle_map) {
         let p, node, tmp, dir;
-        // degree of movement = 4
         let directions = [  [0, 1*GRID_SIZE],
                             [0, -1*GRID_SIZE],
                             [1*GRID_SIZE, 0],
@@ -304,35 +305,190 @@ class AStar8 extends PathFinder {
                             [-1*GRID_SIZE, 1*GRID_SIZE],
                             [1*GRID_SIZE, 1*GRID_SIZE] 
                         ];        
-        this.source.h = this.source.g + this.DiagonalHeuristic(source);                
+        this.source.f = this.source.g + this.DiagonalHeuristic(source);                
         this.open.add(source);                                
         while(this.open.size()!=0) {
             p = this.open.get();
+            await this.renderLists();
             if(this.isGoalNode(p)) {
                 this.reached = 1;
-                await this.renderLine(p);                
+                await this.renderLine(p).then(() => {
+                    if(this.cc.localeCompare('rgb(0, 0, 0)') != 0) {
+                        if(this.reached == 1)
+                            document.getElementById('distance_a8').innerText = this.distance.toFixed(1);
+                        else
+                            document.getElementById('distance_a8').innerText = Infinity;
+                    }   
+                });                      
                 return;   
             }
             this.close.set(p.key, p);
             for(let i=0; i<directions.length;i++) {
                 dir = [directions[i][0], directions[i][1]];
-                if(( ((p.x+dir[0]) >= 0) && ((p.x+dir[0]) < WIDTH)) && ((p.y+dir[1]) >= 0) && ((p.y+dir[1]) < HEIGHT)) {
-                    if(obstacle_map.has((p.x+dir[0])+','+(p.y+dir[1])) == false) {
-                        node = this.createNode(p, dir);              
+                if(this.isNodeInRange(p, dir)) {
+                    node = this.createNode(p, dir);
+                    if(obstacle_map.has(node.key) == false) {              
                         if(this.close.has(node.key) == false) {
                             if(this.open.has(node.key) == false) {
                                 this.open.add(node);
                             } else {
-                                tmp = this.open.getIdx(node.key);
-                                if(tmp[0].h < node.h) {
-                                    this.open.set(node, tmp[1]);
+                                tmp = this.open.getNodeAndIdx(node.key);
+                                if(tmp[0].g > node.g) { 
+                                    this.open.updateNode(node, tmp[1]);
                                 }   
                             }
                         }   
                     }
                 }
+            }              
+        }       
+    }    
+}
+
+class Dijkstra extends PathFinder {
+    constructor(source, goal, cc='rgb(0, 0, 0)') {
+        super(source, goal, cc);
+    }
+    findGCost(dir) {
+        if(dir[0] == 0 || dir[1] == 0)
+            return GRID_SIZE;
+        return 1.4*GRID_SIZE;    
+    }    
+    createNode(p, dir) {
+        let node = new Node(p.x+dir[0], p.y+dir[1]);
+        node.g = p.g + this.findGCost(dir);
+        node.h = 0;
+        node.f = node.g + node.h; 
+        node.parent = p;
+        return node;        
+    }
+    async start(obstacle_map) {
+        let p, node, tmp, dir;
+        let directions = [  [0, 1*GRID_SIZE],
+                            [0, -1*GRID_SIZE],
+                            [1*GRID_SIZE, 0],
+                            [-1*GRID_SIZE, 0],
+                            [-1*GRID_SIZE, -1*GRID_SIZE],
+                            [1*GRID_SIZE, -1*GRID_SIZE],
+                            [-1*GRID_SIZE, 1*GRID_SIZE],
+                            [1*GRID_SIZE, 1*GRID_SIZE] 
+                        ];        
+        this.source.f = this.source.g + 0;                
+        this.open.add(source);                                
+        while(this.open.size()!=0) {
+            p = this.open.get();
+            await this.renderLists();
+            if(this.isGoalNode(p)) {
+                this.reached = 1;    
+                await this.renderLine(p).then(() => {
+                    if(this.cc.localeCompare('rgb(0, 0, 0)') != 0) {
+                        if(this.reached == 1)
+                            document.getElementById('distance_d').innerText = this.distance.toFixed(1);
+                        else
+                            document.getElementById('distance_d').innerText = Infinity;    
+                    }                                 
+                });        
+                return;   
             }
-            await this.renderLists();               
+            this.close.set(p.key, p);
+            for(let i=0; i<directions.length;i++) {
+                dir = [directions[i][0], directions[i][1]];
+                if(this.isNodeInRange(p, dir)) {
+                    node = this.createNode(p, dir);
+                    if(obstacle_map.has(node.key) == false) {              
+                        if(this.close.has(node.key) == false) {
+                            if(this.open.has(node.key) == false) {
+                                this.open.add(node);
+                            } else {
+                                tmp = this.open.getNodeAndIdx(node.key);
+                                if(tmp[0].g > node.g) { 
+                                    this.open.updateNode(node, tmp[1]);
+                                }   
+                            }
+                        }   
+                    }
+                }
+            }               
+        }       
+    }    
+}
+
+class BestFirstSearch extends PathFinder {
+    constructor(source, goal, cc='rgb(0, 0, 0)') {
+        super(source, goal, cc);
+    }
+    max(i, j) {
+        if(i >= j)
+            return i;
+        return j;    
+    }
+    min(i, j) {        
+        if(i < j)
+            return i;
+        return j;    
+    }    
+    DiagonalHeuristic(node) {
+        let h_diagonal = COST_OF_DIAGONAL*this.min(Math.abs(node.x-this.goal.x), Math.abs(node.y-this.goal.y));
+        let h_straight = COST_OF_NON_DIAGONAL*(this.max(Math.abs(node.x-this.goal.x), Math.abs(node.y-this.goal.y)) - 
+                        this.min(Math.abs(node.x-this.goal.x), Math.abs(node.y-this.goal.y))); 
+        return h_diagonal + h_straight;
+                         
+    }
+    createNode(p, dir) {
+        let node = new Node(p.x+dir[0], p.y+dir[1]);
+        node.g = p.g + 0;
+        node.h = this.DiagonalHeuristic(node);
+        node.f = node.g + node.h; 
+        node.parent = p;
+        return node;        
+    }
+    async start(obstacle_map) {
+        let p, node, tmp, dir;
+        let directions = [  [0, 1*GRID_SIZE],
+                            [0, -1*GRID_SIZE],
+                            [1*GRID_SIZE, 0],
+                            [-1*GRID_SIZE, 0],
+                            [-1*GRID_SIZE, -1*GRID_SIZE],
+                            [1*GRID_SIZE, -1*GRID_SIZE],
+                            [-1*GRID_SIZE, 1*GRID_SIZE],
+                            [1*GRID_SIZE, 1*GRID_SIZE] 
+                        ];        
+        this.source.f = this.source.g + this.DiagonalHeuristic(source);                
+        this.open.add(source);                                
+        while(this.open.size()!=0) {
+            p = this.open.get();
+            await this.renderLists();                
+            if(this.isGoalNode(p)) {
+                this.reached = 1;
+                await this.renderLine(p).then(() => {
+                    if(this.cc.localeCompare('rgb(0, 0, 0)') != 0) {
+                        if(this.reached == 1)
+                            document.getElementById('distance_b').innerText = this.distance.toFixed(1);
+                        else    
+                            document.getElementById('distance_b').innerText = Infinity;
+                    }   
+                });                      
+                return;   
+            }
+            this.close.set(p.key, p);
+            for(let i=0; i<directions.length;i++) {
+                dir = [directions[i][0], directions[i][1]];
+                if(this.isNodeInRange(p, dir)) {
+                    node = this.createNode(p, dir);
+                    if(obstacle_map.has(node.key) == false) {              
+                        if(this.close.has(node.key) == false) {
+                            if(this.open.has(node.key) == false) {
+                                this.open.add(node);
+                            } else {
+                                tmp = this.open.getNodeAndIdx(node.key);
+                                if(tmp[0].g > node.g) { 
+                                    this.open.updateNode(node, tmp[1]);
+                                }   
+                            }
+                        }   
+                    }
+                }
+            }               
         }       
     }    
 }
