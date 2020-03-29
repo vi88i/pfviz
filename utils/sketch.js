@@ -124,6 +124,7 @@ async function AStar4_Wrapper() {
             document.getElementById('p_path_found').style.display = 'block';  
             if(_.reached == 0) {
                 document.getElementById('p_path_found').innerText = 'Unreachable!';
+                document.getElementById('distance').innerText = 'Infinity';
             } else {
                 document.getElementById('p_path_found').innerText = 'Goal reached!';
                 document.getElementById('distance').innerText = _.distance.toFixed(1);
@@ -143,6 +144,7 @@ async function AStar8_Wrapper() {
             document.getElementById('p_path_found').style.display = 'block';           
             if(_.reached == 0) {
                 document.getElementById('p_path_found').innerText = 'Unreachable!';
+                document.getElementById('distance').innerText = 'Infinity';
             } else {
                 document.getElementById('p_path_found').innerText = 'Goal reached!';
                 document.getElementById('distance').innerText = _.distance.toFixed(1);
@@ -162,6 +164,7 @@ async function Dijkstra_Wrapper() {
             document.getElementById('p_path_found').style.display = 'block';           
             if(_.reached == 0) {
                 document.getElementById('p_path_found').innerText = 'Unreachable!';
+                document.getElementById('distance').innerText = 'Infinity';
             } else {
                 document.getElementById('p_path_found').innerText = 'Goal reached!';
                 document.getElementById('distance').innerText = _.distance.toFixed(1);
@@ -181,6 +184,7 @@ async function BestFirstSearch_Wrapper() {
             document.getElementById('p_path_found').style.display = 'block';           
             if(_.reached == 0) {
                 document.getElementById('p_path_found').innerText = 'Unreachable!';
+                document.getElementById('distance').innerText = 'Infinity';
             } else {
                 document.getElementById('p_path_found').innerText = 'Goal reached!';
                 document.getElementById('distance').innerText = _.distance.toFixed(1);
@@ -194,6 +198,10 @@ async function BestFirstSearch_Wrapper() {
 async function RunAll() {
     if(isPointsInRange() == true) {
         document.getElementById('line_legend').style.display = 'block';
+        document.getElementById('distance_a8').innerText = 'Infinity';
+        document.getElementById('distance_a4').innerText = 'Infinity';
+        document.getElementById('distance_b').innerText = 'Infinity';
+        document.getElementById('distance_d').innerText = 'Infinity';        
         new AStar4(source, goal, 'rgb(255, 0, 0)').start(obstacle_map);
         new AStar8(source, goal, 'rgb(0, 255, 0)').start(obstacle_map);
         new Dijkstra(source, goal, 'rgb(0, 0, 255)').start(obstacle_map);

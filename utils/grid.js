@@ -235,10 +235,7 @@ class AStar4 extends PathFinder {
                 this.reached = 1;
                 await this.renderLine(p).then(() => {
                     if(this.cc.localeCompare('rgb(0, 0, 0)') != 0) { 
-                        if(this.reached == 1)
-                            document.getElementById('distance_a4').innerText = this.distance.toFixed(1);
-                        else    
-                            document.getElementById('distance_a4').innerText = Infinity;
+                        document.getElementById('distance_a4').innerText = this.distance.toFixed(1);
                     }                           
                 });
                 return;   
@@ -325,10 +322,7 @@ class AStar8 extends PathFinder {
                 this.reached = 1;
                 await this.renderLine(p).then(() => {
                     if(this.cc.localeCompare('rgb(0, 0, 0)') != 0) {
-                        if(this.reached == 1)
-                            document.getElementById('distance_a8').innerText = this.distance.toFixed(1);
-                        else
-                            document.getElementById('distance_a8').innerText = Infinity;
+                        document.getElementById('distance_a8').innerText = this.distance.toFixed(1);
                     }   
                 });                      
                 return;   
@@ -393,10 +387,7 @@ class Dijkstra extends PathFinder {
                 this.reached = 1;    
                 await this.renderLine(p).then(() => {
                     if(this.cc.localeCompare('rgb(0, 0, 0)') != 0) {
-                        if(this.reached == 1)
-                            document.getElementById('distance_d').innerText = this.distance.toFixed(1);
-                        else
-                            document.getElementById('distance_d').innerText = Infinity;    
+                        document.getElementById('distance_d').innerText = this.distance.toFixed(1);
                     }                                 
                 });        
                 return;   
@@ -473,10 +464,7 @@ class BestFirstSearch extends PathFinder {
                 this.reached = 1;
                 await this.renderLine(p).then(() => {
                     if(this.cc.localeCompare('rgb(0, 0, 0)') != 0) {
-                        if(this.reached == 1)
-                            document.getElementById('distance_b').innerText = this.distance.toFixed(1);
-                        else    
-                            document.getElementById('distance_b').innerText = Infinity;
+                        document.getElementById('distance_b').innerText = this.distance.toFixed(1);
                     }   
                 });                      
                 return;   
