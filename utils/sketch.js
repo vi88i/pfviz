@@ -31,7 +31,7 @@ async function renderObstacles(animate=false) {
     updateObstaclesCounter();
 }
 
-function renderPoints() {
+async function renderPoints() {
     if(source.x > -1 && source.y > -1) {
         fill('rgb(255, 0, 0)');
         circle(source.x+GRID_SIZE/2, source.y+GRID_SIZE/2, DIAMETER);        
@@ -42,7 +42,7 @@ function renderPoints() {
     }    
 }
 
-function renderGrid(animate=false) {
+async function renderGrid(animate=false) {
     clear();
     for(let i=0;i <= WIDTH; i+=GRID_SIZE) {
         stroke('rgb(0, 0, 0)');
@@ -52,8 +52,8 @@ function renderGrid(animate=false) {
         stroke('rgb(0, 0, 0)');
         line(0, i, WIDTH, i);
     }    
-    renderPoints();
-    renderObstacles(animate);
+    await renderPoints();
+    await renderObstacles(animate);
 }
 
 function setup() {
@@ -126,7 +126,7 @@ async function AStar4_Wrapper() {
                 document.getElementById('p_path_found').innerText = 'Unreachable!';
             } else {
                 document.getElementById('p_path_found').innerText = 'Goal reached!';
-                document.getElementById('distance').innerText = _.distance;
+                document.getElementById('distance').innerText = _.distance.toFixed(1);
             }
         });
     } else {
@@ -145,7 +145,7 @@ async function AStar8_Wrapper() {
                 document.getElementById('p_path_found').innerText = 'Unreachable!';
             } else {
                 document.getElementById('p_path_found').innerText = 'Goal reached!';
-                document.getElementById('distance').innerText = _.distance;
+                document.getElementById('distance').innerText = _.distance.toFixed(1);
             }
         });
     } else {
@@ -164,7 +164,7 @@ async function Dijkstra_Wrapper() {
                 document.getElementById('p_path_found').innerText = 'Unreachable!';
             } else {
                 document.getElementById('p_path_found').innerText = 'Goal reached!';
-                document.getElementById('distance').innerText = _.distance;
+                document.getElementById('distance').innerText = _.distance.toFixed(1);
             }
         });
     } else {
@@ -183,7 +183,7 @@ async function BestFirstSearch_Wrapper() {
                 document.getElementById('p_path_found').innerText = 'Unreachable!';
             } else {
                 document.getElementById('p_path_found').innerText = 'Goal reached!';
-                document.getElementById('distance').innerText = _.distance;
+                document.getElementById('distance').innerText = _.distance.toFixed(1);
             }
         });
     } else {

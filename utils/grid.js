@@ -1,4 +1,4 @@
-async function delay(delayInms) {
+async function delay(delayInms) { // implementation of delay
     return new Promise(resolve  => {
       setTimeout(() => {
         resolve(2);
@@ -59,7 +59,7 @@ class MinHeap {
     has(key) {
         return this.set.has(key);
     }
-    getNodeAndIdx(key) { // currently O(n), can be improved to O(log(n))
+    getNodeAndIdx(key) { // find node having specific key value
         for(let i=1;i<this.heap.length;i++) {
             if(key.localeCompare(this.heap[i].key) == 0)
                 return [this.heap[i], i];
@@ -137,13 +137,14 @@ class PathFinder {
         this.open = new MinHeap(); // open list - potential next node to jump based on f cost
         this.close = new Map(); // closed list - won't be visited again
         this.reached = 0; // flag for result check
-        this.distance = 0;
-        this.cc = cc;
+        this.distance = 0; // measure distance from goal to destination
+        this.cc = cc; // color scheme for path
+        // color scheme is also used as flag to animate open and closed list, check further
     }
     isGoalNode(node) { // checks if current node goal cell
         return node.x == this.goal.x && node.y == this.goal.y;
     }
-    isNodeInRange(p, dir) {
+    isNodeInRange(p, dir) { // checks if neighbouring cell is in range as defined in config.js
         return ((p.x+dir[0]) >= 0) && ((p.x+dir[0]) < WIDTH) && ((p.y+dir[1]) >= 0) && ((p.y+dir[1]) < HEIGHT);        
     }    
     async renderLists() { // animates closed and open list
@@ -165,7 +166,7 @@ class PathFinder {
             await delay(5);
         }
     }
-    isDiagonalNode(parent, node) {
+    isDiagonalNode(parent, node) { // checks if node is diagonally adjacent
         let directions = [  [-1*GRID_SIZE, -1*GRID_SIZE],
                             [1*GRID_SIZE, -1*GRID_SIZE],
                             [-1*GRID_SIZE, 1*GRID_SIZE],
@@ -203,6 +204,11 @@ class AStar4 extends PathFinder {
         super(source, goal, cc);
     }
     ManhattanDistance(node) {
+        /* 
+            1.1 is specifically tuned for this plot, you can change as you wish
+            Some findings:
+                if you multiply anything less than 1, it behaves like 4-way dijkstra's
+        */ 
         return 1.1 * (Math.abs(node.x - goal.x) + Math.abs(node.y - goal.y));
     }             
     createNode(p, dir) { // creates a node, based on parent node and direction
@@ -228,7 +234,7 @@ class AStar4 extends PathFinder {
             if(this.isGoalNode(p)) {
                 this.reached = 1;
                 await this.renderLine(p).then(() => {
-                    if(this.cc.localeCompare('rgb(0, 0, 0)') != 0) {
+                    if(this.cc.localeCompare('rgb(0, 0, 0)') != 0) { 
                         if(this.reached == 1)
                             document.getElementById('distance_a4').innerText = this.distance.toFixed(1);
                         else    
@@ -274,6 +280,7 @@ class AStar8 extends PathFinder {
             return i;
         return j;    
     }
+    // source - https://www.growingwiththeweb.com/2012/06/a-pathfinding-algorithm.html
     DiagonalHeuristic(node) {
         let h_diagonal = COST_OF_DIAGONAL*this.min(Math.abs(node.x-this.goal.x), Math.abs(node.y-this.goal.y));
         let h_straight = COST_OF_NON_DIAGONAL*(this.max(Math.abs(node.x-this.goal.x), Math.abs(node.y-this.goal.y)) - 
@@ -281,7 +288,11 @@ class AStar8 extends PathFinder {
         return h_diagonal + h_straight;
                          
     }   
-    findGCost(dir) {
+    findGCost(dir) { 
+        /* 
+            In 8-way movement diagonally moving should be penalized more.
+            If both adjacent and digonal movement weighted equally, you will get a highly zig-zag pattern and less smooth 
+        */ 
         if(dir[0] == 0 || dir[1] == 0)
             return GRID_SIZE;
         return 1.4*GRID_SIZE;    
@@ -357,7 +368,7 @@ class Dijkstra extends PathFinder {
     createNode(p, dir) {
         let node = new Node(p.x+dir[0], p.y+dir[1]);
         node.g = p.g + this.findGCost(dir);
-        node.h = 0;
+        node.h = 0; // In dijkstra' heuristic is always zero, that's it!
         node.f = node.g + node.h; 
         node.parent = p;
         return node;        
@@ -373,7 +384,7 @@ class Dijkstra extends PathFinder {
                             [-1*GRID_SIZE, 1*GRID_SIZE],
                             [1*GRID_SIZE, 1*GRID_SIZE] 
                         ];        
-        this.source.f = this.source.g + 0;                
+        this.source.f = this.source.g + 0;                 
         this.open.add(source);                                
         while(this.open.size()!=0) {
             p = this.open.get();
@@ -436,7 +447,7 @@ class BestFirstSearch extends PathFinder {
     }
     createNode(p, dir) {
         let node = new Node(p.x+dir[0], p.y+dir[1]);
-        node.g = p.g + 0;
+        node.g = p.g + 0; // In best first search g cost is always zero, that's it!
         node.h = this.DiagonalHeuristic(node);
         node.f = node.g + node.h; 
         node.parent = p;

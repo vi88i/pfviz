@@ -1,4 +1,4 @@
-function removeLegend() {
+function removeLegend() { // hide legend related things
     document.getElementById('p_path_found').style.display = 'none';
     document.getElementById('legend').style.display = 'none';
     document.getElementById('line_legend').style.display = 'none';
@@ -82,8 +82,11 @@ async function render(key) {
         case "maze_gen":
             m.hold(); 
             maze_generator().then(() => {
-                renderGrid(true);
-                m.release();
+                renderGrid(true).then(() => {
+                    m.release();
+                }).catch(() => {
+                    m.release();
+                });
             }).catch(() => {
                 m.release();
             });
@@ -109,6 +112,7 @@ async function render(key) {
     }
 }
 
+// attach onclick behaviour to each option in navbar
 for(let i=0;i<document.getElementsByTagName("button").length;i++) {
     let id = 'b' + i;
     document.getElementById(id).onclick = function() {
@@ -116,4 +120,5 @@ for(let i=0;i<document.getElementsByTagName("button").length;i++) {
     }
 }
 
+// constant throughout
 document.getElementById('num_grids').innerText = (WIDTH/GRID_SIZE) * (HEIGHT/GRID_SIZE); 
