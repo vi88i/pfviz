@@ -13,5 +13,3 @@ This project aims to visualize path-finding algorithm using p5js.
 | Dijkstra | Special case of A* when h(n) =0 |
 | Best First Search | Special case of A* when g(n) = 0 |
 | Maze generator | Uses Kruskal's algorithm |
-
-Available at: https://a-star-viz.herokuapp.com/
