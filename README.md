@@ -4,6 +4,13 @@
 
 This project aims to visualize path-finding algorithm using p5js.  
 
+## Setup 
+```bash
+$ git clone https://github.com/vi88i/Path-finding-viz.git && cd Path-finding-viz
+$ npm install
+$ node app.js
+```
+
 ## Algorithms
 
 | *Name*            |     *Feature*  |
