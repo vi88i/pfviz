@@ -4,6 +4,8 @@
 
 This project aims to visualize path-finding algorithm using p5js.  
 
+Check out demo on: https://youtu.be/7U1ZJefZf6s
+
 ## Setup 
 ```bash
 $ git clone https://github.com/vi88i/pfviz.git && cd pfviz
