@@ -1,10 +1,8 @@
-# Path finding Visualization
+# pfviz
 
 ![alt text](./assets/img.png "Path finding algorithms")
 
-This project aims to visualize path-finding algorithm using p5js.  
-
-Check out demo on: https://youtu.be/7U1ZJefZf6s
+### Yet another path finding visualisation.  
 
 ## Setup 
 ```bash
