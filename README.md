@@ -1,8 +1,8 @@
 # pfviz
 
-![alt text](./assets/img.png "Path finding algorithms")
+<p align="center"><b>Yet another path finding visualisation.</b></p>
 
-### Yet another path finding visualisation.  
+![alt text](./assets/img.png "Path finding algorithms")
 
 ## Setup 
 ```bash
